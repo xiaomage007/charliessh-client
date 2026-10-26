@@ -12,9 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "charliessh-client",
-        "width": 800,
-        "height": 600
+        "title": "CharlieSSH",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 640,
+        "center": true,
+        "theme": "Dark"
       }
     ],
     "security": {

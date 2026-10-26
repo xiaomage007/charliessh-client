@@ -1,0 +1,178 @@
+/* 左侧服务器配置面板 */
+
+.server-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background-color: var(--vscode-sideBar-bg);
+}
+
+.server-panel__toolbar {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.server-panel__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: var(--radius-sm);
+  background-color: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  color: var(--vscode-descriptionForeground);
+}
+
+.server-panel__search:focus-within {
+  border-color: var(--vscode-focusBorder);
+}
+
+.server-panel__search-input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--vscode-input-foreground);
+}
+
+.server-panel__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.server-panel__delete-hint {
+  margin: 0 0 6px;
+}
+
+/* ---------- 列表 ---------- */
+
+.server-list {
+  padding: 4px 0 12px;
+}
+
+.server-list__empty {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--vscode-descriptionForeground);
+}
+
+.server-list__empty p {
+  margin: 0 0 6px;
+}
+
+.server-list__empty-hint {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.server-group__header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.server-group__count {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.server-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 8px 0 14px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+
+.server-item:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+.server-item--active {
+  background-color: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+  border-left-color: var(--vscode-focusBorder);
+}
+
+.server-item__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 15px;
+}
+
+.server-item__name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.server-item__host {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.server-item--active .server-item__host {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.server-item__actions {
+  display: flex;
+  gap: 1px;
+  opacity: 0;
+}
+
+.server-item:hover .server-item__actions {
+  opacity: 1;
+}
+
+.server-item--active .server-item__actions {
+  opacity: 1;
+}
+
+/* ---------- 状态点 ---------- */
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background-color: var(--vscode-descriptionForeground);
+}
+
+.status-dot--connected {
+  background-color: var(--vscode-charts-green);
+}
+
+.status-dot--connecting {
+  background-color: var(--vscode-charts-yellow);
+}
+
+.status-dot--error {
+  background-color: var(--vscode-charts-red);
+}
+
+.status-dot--disconnected {
+  background-color: var(--vscode-descriptionForeground);
+  opacity: 0.5;
+}
