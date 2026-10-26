@@ -1,51 +1,101 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import { useCallback, useEffect, useState } from "react";
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+import { ChatPanel } from "./components/chat/ChatPanel";
+import { ActivityBar, type PanelView } from "./components/layout/ActivityBar";
+import { StatusBar } from "./components/layout/StatusBar";
+import { EditorArea } from "./components/terminal/EditorArea";
+import { ServerPanel } from "./components/servers/ServerPanel";
+import { useChatActions } from "./hooks/useChatActions";
+import { ChatProvider } from "./state/ChatContext";
+import { ServersProvider } from "./state/ServersContext";
+import { TerminalsProvider } from "./state/TerminalsContext";
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+/** 三栏骨架与全局快捷键 */
+function AppShell() {
+  const [activeView, setActiveView] = useState<PanelView>("servers");
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [terminalFocusRequest, setTerminalFocusRequest] = useState(0);
+  const [chatFocusRequest, setChatFocusRequest] = useState(0);
+  const { createConversation } = useChatActions();
+
+  const handleSelectView = useCallback((view: PanelView): void => {
+    setActiveView(view);
+    if (view === "terminal") {
+      setTerminalFocusRequest((count) => count + 1);
+    }
+    if (view === "chat") {
+      setChatFocusRequest((count) => count + 1);
+    }
+  }, []);
+
+  const handleNewConversation = useCallback((): void => {
+    createConversation();
+    setActiveView("chat");
+    setChatFocusRequest((count) => count + 1);
+  }, [createConversation]);
+
+  // 全局快捷键：Ctrl+B 折叠侧栏、Ctrl+` 聚焦终端、Ctrl+N 新建对话
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (!event.ctrlKey || event.altKey || event.shiftKey) return;
+
+      if (event.key === "b" || event.key === "B") {
+        event.preventDefault();
+        setSidebarVisible((visible) => !visible);
+        return;
+      }
+      if (event.key === "`") {
+        event.preventDefault();
+        setActiveView("terminal");
+        setTerminalFocusRequest((count) => count + 1);
+        return;
+      }
+      if (event.key === "n" || event.key === "N") {
+        event.preventDefault();
+        handleNewConversation();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleNewConversation]);
 
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
+    <div
+      className={`app-shell ${
+        sidebarVisible ? "" : "app-shell--sidebar-hidden"
+      }`.trim()}
+    >
+      <ActivityBar
+        activeView={activeView}
+        onSelect={handleSelectView}
+        sidebarVisible={sidebarVisible}
+        onToggleSidebar={() => setSidebarVisible((visible) => !visible)}
+      />
 
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
+      {sidebarVisible ? (
+        <ServerPanel active={activeView === "servers"} />
+      ) : (
+        <div className="app-shell__sidebar-placeholder" />
+      )}
 
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+      <EditorArea focusRequest={terminalFocusRequest} />
+
+      <ChatPanel focusRequest={chatFocusRequest} />
+
+      <StatusBar />
+    </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ServersProvider>
+      <TerminalsProvider>
+        <ChatProvider>
+          <AppShell />
+        </ChatProvider>
+      </TerminalsProvider>
+    </ServersProvider>
+  );
+}
