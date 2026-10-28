@@ -37,3 +37,4 @@ src-tauri/Cargo.lock
 .env.*.local
 
 
+/.vscode/
