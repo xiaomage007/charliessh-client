@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    charliessh_client_lib::run()
+    walissh_client_lib::run()
 }

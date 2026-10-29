@@ -117,7 +117,7 @@ export function RightSidebar({ width = 400 }: RightSidebarProps) {
       <div className="flex-1 overflow-y-auto">
         {!currentSession ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 px-6">
-            <img src="/logo.png" alt="CharlieSSH" className="w-14 h-14 mb-2 opacity-60 rounded" />
+            <img src="/logo.png" alt="WaLiSSH" className="w-14 h-14 mb-2 opacity-60 rounded" />
             <h3 className="text-base font-medium" style={{ color: colors.text }}>开始对话</h3>
             <p className="text-xs text-center max-w-xs leading-relaxed" style={{ color: colors.textSecondary }}>
               连接 SSH 后，可以向我询问服务器状态、执行命令、排查问题、管理文件。
@@ -125,9 +125,9 @@ export function RightSidebar({ width = 400 }: RightSidebarProps) {
           </div>
         ) : currentSession.messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-4 px-6">
-            <img src="/logo.png" alt="CharlieSSH" className="w-10 h-10 opacity-50 rounded" />
+            <img src="/logo.png" alt="WaLiSSH" className="w-10 h-10 opacity-50 rounded" />
             <div className="text-center">
-              <p className="text-sm font-medium mb-1" style={{ color: colors.text }}>CharlieSSH AI</p>
+              <p className="text-sm font-medium mb-1" style={{ color: colors.text }}>WaLiSSH AI</p>
               <p className="text-xs" style={{ color: colors.textDim }}>执行命令 · 排查问题 · 管理服务器</p>
             </div>
             <div className="w-full max-w-xs space-y-1.5">
@@ -307,7 +307,7 @@ export function RightSidebar({ width = 400 }: RightSidebarProps) {
               className="absolute pointer-events-none text-sm"
               style={{ left: '16px', top: '8px', color: colors.textDim, opacity: 0.6 }}
             >
-              向 CharlieSSH 提问... (@ 技能 · ↑↓ 历史 · Enter 发送)
+              向 WaLiSSH 提问... (@ 技能 · ↑↓ 历史 · Enter 发送)
             </div>
           )}
 

@@ -64,7 +64,7 @@ export function TerminalPanel() {
 
     // 欢迎信息
     term.writeln('')
-    term.writeln(`\x1b[1;36m  CharlieSSH Terminal\x1b[0m \x1b[90mv0.1.0\x1b[0m`)
+    term.writeln(`\x1b[1;36m  WaLiSSH Terminal\x1b[0m \x1b[90mv0.1.0\x1b[0m`)
     term.writeln('')
     term.writeln(`\x1b[90m  当前连接: ${currentConn ? currentConn.name : '未连接'}\x1b[0m`)
     term.writeln('')

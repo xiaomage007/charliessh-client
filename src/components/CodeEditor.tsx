@@ -1,20 +1,4 @@
-import Editor, { loader } from '@monaco-editor/react'
-import * as monaco from 'monaco-editor'
-import editorWorker from 'monaco-editor/editor/editor.worker.js?worker'
-import tsWorker from 'monaco-editor/language/typescript/ts.worker.js?worker'
-
-// 桌面端离线环境无法访问 CDN，改为使用本地打包的 Monaco
-// 注意 worker 路径不能带 esm/vs 前缀：monaco-editor 的 exports 为 "./*": "./esm/vs/*.js"
-const monacoGlobal = self as unknown as {
-  MonacoEnvironment: { getWorker: (_moduleId: string, label: string) => Worker }
-}
-
-monacoGlobal.MonacoEnvironment = {
-  getWorker: (_moduleId, label) =>
-    label === 'typescript' || label === 'javascript' ? new tsWorker() : new editorWorker(),
-}
-
-loader.config({ monaco })
+import Editor from '@monaco-editor/react'
 
 export function CodeEditor() {
   return (
@@ -32,11 +16,11 @@ export function CodeEditor() {
           height="100%"
           defaultLanguage="javascript"
           theme="vs-dark"
-          defaultValue={`// CharlieSSH Code Editor
+          defaultValue={`// WaLiSSH Code Editor
 // 使用 AI Agent 协助编写代码
 
 function hello() {
-  console.log("Hello from CharlieSSH!");
+  console.log("Hello from WaLiSSH!");
 }
 `}
           options={{
