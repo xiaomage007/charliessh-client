@@ -5,6 +5,7 @@ import {WebglAddon} from '@xterm/addon-webgl'
 import '@xterm/xterm/css/xterm.css'
 import {useThemeStore} from '../stores/themeStore'
 import {useConnectionStore} from '../stores/connectionStore'
+import {useAgentStore} from '../stores/agentStore'
 import {openTerminal, writeInput, readOutput, resizeTerminal, closeTerminal} from '../api/terminal'
 import {ConnectionStatus} from '../types'
 
@@ -44,7 +45,8 @@ const POLL_ERROR_THRESHOLD = 3
 
 export function TerminalPanel() {
     const {colors} = useThemeStore()
-    const {currentConnectionId, connections, connect, disconnect} = useConnectionStore()
+    const {currentConnectionId, connections, connect, disconnect, setTerminalSession} = useConnectionStore()
+    const {createSession: createAgentSession} = useAgentStore()
 
     /** connectionId → 终端状态（每个连接独立 Terminal 实例，切换时保留日志） */
     const terminalStates = useRef<Map<string, ConnectionTerminalState>>(new Map())
@@ -115,7 +117,10 @@ export function TerminalPanel() {
         }
 
         state.terminal.writeln(`\x1b[33m\r\n*** ${reason} ***\x1b[0m`)
-    }, [stopPolling, connections, disconnect])
+        if (state.session) {
+            setTerminalSession(state.session.connectionId, null)
+        }
+    }, [stopPolling, connections, disconnect, setTerminalSession])
 
     /** 启动轮询 */
     const startPolling = useCallback((state: ConnectionTerminalState) => {
@@ -180,6 +185,7 @@ export function TerminalPanel() {
         if (state.session) {
             closeTerminal(state.session.sessionId).catch(() => {
             })
+            setTerminalSession(state.session.connectionId, null)
         }
 
         // 释放输入监听
@@ -289,6 +295,9 @@ export function TerminalPanel() {
             const {sessionId, initialOutput} = res.data!
             state.session = {sessionId, connectionId}
 
+            // 同步 terminalSessionId 到 store，供 AI 对话使用
+            setTerminalSession(connectionId, sessionId)
+
             // 显示初始输出
             if (initialOutput) {
                 term.write(initialOutput)
@@ -356,7 +365,8 @@ export function TerminalPanel() {
         const state = terminalStates.current.get(currentConn.id)
 
         if (isConnected) {
-            // 已连接：创建或恢复终端
+            // 已连接：创建或恢复终端，同时确保 AI 会话存在
+            createAgentSession()
             if (!state) {
                 openTerminalSession(currentConn.id)
             } else if (state.disconnected) {
@@ -371,7 +381,7 @@ export function TerminalPanel() {
                 destroyTerminal(currentConn.id)
             }
         }
-    }, [currentConn, openTerminalSession, destroyTerminal])
+    }, [currentConn, openTerminalSession, destroyTerminal, createAgentSession])
 
     /** 组件卸载：清理所有终端 */
     useEffect(() => {

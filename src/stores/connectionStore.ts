@@ -10,6 +10,8 @@ interface ConnectionStore {
     connections: SSHConnection[]
     // 当前选中的连接
     currentConnectionId: string | null
+    // 连接ID -> 终端会话ID 映射
+    terminalSessions: Record<string, string>
     // 服务端状态
     serverStatus: ServerStatus
     // 列表加载中
@@ -43,6 +45,12 @@ interface ConnectionStore {
     // 断开 SSH 连接
     disconnect: (id: string) => Promise<boolean>
 
+    // ===== 终端会话 =====
+    /** 设置连接对应的终端会话ID */
+    setTerminalSession: (connectionId: string, sessionId: string | null) => void
+    /** 获取当前选中连接的终端会话ID */
+    getCurrentTerminalSession: () => string | null
+
     // ===== 心跳检测 =====
     /** 启动心跳：定期检查已连接的 SSH 状态 */
     startHeartbeat: () => void
@@ -70,6 +78,7 @@ let heartbeatTimer: ReturnType<typeof setInterval> | null = null
 export const useConnectionStore = create<ConnectionStore>((set, get) => ({
     connections: [],
     currentConnectionId: null,
+    terminalSessions: {},
     serverStatus: {
         connected: false,
         url: 'http://localhost:8091',
@@ -137,10 +146,15 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
         try {
             const res = await sshApi.deleteConnection(id)
             if (res.code === '0000') {
-                set((state) => ({
-                    connections: state.connections.filter((c) => c.id !== id),
-                    currentConnectionId: state.currentConnectionId === id ? null : state.currentConnectionId,
-                }))
+                set((state) => {
+                    const terminalSessions = {...state.terminalSessions}
+                    delete terminalSessions[id]
+                    return {
+                        connections: state.connections.filter((c) => c.id !== id),
+                        currentConnectionId: state.currentConnectionId === id ? null : state.currentConnectionId,
+                        terminalSessions,
+                    }
+                })
             } else {
                 set({error: res.info || '删除连接失败'})
             }
@@ -193,12 +207,17 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
         try {
             const res = await sshApi.disconnect(id)
             if (res.code === '0000') {
-                // 更新本地状态为未连接
-                set((state) => ({
-                    connections: state.connections.map((c) =>
-                        c.id === id ? {...c, status: 0} : c
-                    ),
-                }))
+                // 更新本地状态为未连接，并清理终端会话ID
+                set((state) => {
+                    const terminalSessions = {...state.terminalSessions}
+                    delete terminalSessions[id]
+                    return {
+                        connections: state.connections.map((c) =>
+                            c.id === id ? {...c, status: 0} : c
+                        ),
+                        terminalSessions,
+                    }
+                })
                 return true
             }
             set({error: res.info || '断开连接失败'})
@@ -207,6 +226,24 @@ export const useConnectionStore = create<ConnectionStore>((set, get) => ({
             set({error: '网络错误，无法连接服务器'})
             return false
         }
+    },
+
+    // ===== 终端会话 =====
+    setTerminalSession: (connectionId, sessionId) =>
+        set((state) => {
+            const terminalSessions = {...state.terminalSessions}
+            if (sessionId) {
+                terminalSessions[connectionId] = sessionId
+            } else {
+                delete terminalSessions[connectionId]
+            }
+            return {terminalSessions}
+        }),
+
+    getCurrentTerminalSession: () => {
+        const state = get()
+        if (!state.currentConnectionId) return null
+        return state.terminalSessions[state.currentConnectionId] || null
     },
 
     // ===== 心跳检测 =====
