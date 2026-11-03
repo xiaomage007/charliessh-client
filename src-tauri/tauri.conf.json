@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "WaLiSSH",
+  "productName": "CharlieSSH",
   "version": "0.1.0",
-  "identifier": "cn.bugstack.ai",
+  "identifier": "com.charlie.ai",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:5173",
@@ -13,7 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "WaLiSSH",
+        "title": "CharlieSSH",
         "width": 1280,
         "height": 800,
         "minWidth": 900,
