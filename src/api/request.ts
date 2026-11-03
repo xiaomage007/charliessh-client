@@ -17,6 +17,30 @@ export interface ApiResponse<T = unknown> {
 /** 默认服务端地址 */
 const DEFAULT_SERVER_URL = 'http://localhost:8091'
 
+/** 服务端地址持久化 key */
+const STORAGE_KEY = 'charliessh_server_url'
+
+/** 旧版本（WaLiSSH 时期）使用的 key，读取时自动迁移，避免丢失用户已配置的地址 */
+const LEGACY_STORAGE_KEY = 'walissh_server_url'
+
+/**
+ * 读取持久化的服务端地址
+ * 兼容旧 key，并自动迁移到新 key
+ */
+function readStoredServerUrl(): string {
+    const current = localStorage.getItem(STORAGE_KEY)
+    if (current) return current
+
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY)
+    if (legacy) {
+        localStorage.setItem(STORAGE_KEY, legacy)
+        localStorage.removeItem(LEGACY_STORAGE_KEY)
+        return legacy
+    }
+
+    return ''
+}
+
 /**
  * 服务端基础地址
  * - dev 模式默认空字符串（走 Vite proxy）
@@ -25,7 +49,7 @@ const DEFAULT_SERVER_URL = 'http://localhost:8091'
  */
 let baseUrl: string = import.meta.env.DEV
     ? ''
-    : (localStorage.getItem('walissh_server_url') || DEFAULT_SERVER_URL)
+    : (readStoredServerUrl() || DEFAULT_SERVER_URL)
 
 /** 获取当前服务端地址（显示用，空字符串时返回默认值） */
 export function getBaseUrl(): string {
@@ -50,10 +74,11 @@ export function setBaseUrl(url: string): void {
         baseUrl = trimmed || DEFAULT_SERVER_URL
     }
     if (trimmed && trimmed !== DEFAULT_SERVER_URL) {
-        localStorage.setItem('walissh_server_url', trimmed)
+        localStorage.setItem(STORAGE_KEY, trimmed)
     } else {
-        localStorage.removeItem('walissh_server_url')
+        localStorage.removeItem(STORAGE_KEY)
     }
+    localStorage.removeItem(LEGACY_STORAGE_KEY)
 }
 
 /** 请求超时（毫秒） */
