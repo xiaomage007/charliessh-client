@@ -50,7 +50,7 @@ interface AgentStore {
     sendMessage: (content: string, terminalSessionId?: string | null) => Promise<void>
 }
 
-const DEFAULT_USER_ID = 'walissh-user'
+const DEFAULT_USER_ID = 'charliessh-user'
 
 export const useAgentStore = create<AgentStore>((set, get) => ({
     agents: [],
@@ -213,7 +213,7 @@ export const useAgentStore = create<AgentStore>((set, get) => ({
             timestamp: Date.now(),
         }
         get().addMessage(sessionId, userMessage)
-        get().setLoading(true, 'WaLiSSH 正在思考...')
+        get().setLoading(true, 'CharlieSSH 正在思考...')
 
         try {
             // 2. 确保后端会话已创建
